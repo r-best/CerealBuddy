@@ -6,7 +6,7 @@ import picamera
 import numpy as np
 import matplotlib.pyplot as plt
 
-from processing import test
+from processing import *
 
 
 RESOLUTION = (640, 480)
@@ -36,8 +36,14 @@ def main():
         logging.debug("Capturing image")
         image = np.empty((RESOLUTION[1], RESOLUTION[0], 3), dtype=np.uint8)
         camera.capture(image, 'bgr')
+
         logging.debug("Processing image")
-        image = test(image)
+        bellipse, gellipse, rellipse = getEllipse(image)
+        features = extractFeatures(bellipse, gellipse, rellipse)
+
+        cv2.imshow("", image)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
 
 
 if __name__ == "__main__":
