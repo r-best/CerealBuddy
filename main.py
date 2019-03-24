@@ -12,18 +12,26 @@ from processing import *
 
 
 RESOLUTION = (640, 480)
-running = True
 x_train = []
 y_train = []
 
 
 def sig_handler(sig, frame):
-    global running
+    global running, x_train, y_train
     logging.info("Shutting down...")
-    running = False
+    cv2.destroyAllWindows()
+    logging.info("Saving dataset to file")
+    train = np.insert(x_train, 0, y_train, axis=1)
+    np.savetxt('dataset_temp.csv', train, delimiter=',', fmt='%s')
+    os.remove('dataset.csv')
+    os.rename('dataset_temp.csv', 'dataset.csv')
+
+    logging.info("Done!")
+    exit()
 
 
 def main():
+    global x_train, y_train
     logging.basicConfig(format="%(levelname)s: %(message)s")
     logging.getLogger().setLevel(logging.DEBUG)
 
@@ -43,7 +51,7 @@ def main():
     signal.signal(signal.SIGINT, sig_handler)
 
     logging.info("Starting inference loop")
-    while running is True:
+    while True:
         logging.debug("Capturing image")
         image = np.empty((RESOLUTION[1], RESOLUTION[0], 3), dtype=np.uint8)
         camera.capture(image, 'bgr')
@@ -64,25 +72,17 @@ def main():
 
         if keycode == 121: # y key
             logging.debug("Prediction was right!")
-            np.insert(x_train, len(x_train), features, axis=0)
-            np.append(y_train, pred)
+            x_train = np.insert(x_train, len(x_train), features, axis=0)
+            y_train = np.append(y_train, pred)
             clf.partial_fit([features], [pred])
         elif keycode == 110: # n key
             logging.debug("Prediction was wrong :(")
             correct = 0 if pred == 1 else 1
-            np.insert(x_train, len(x_train), features, axis=0)
-            np.append(y_train, correct)
+            x_train = np.insert(x_train, len(x_train), features, axis=0)
+            y_train = np.append(y_train, correct)
             clf.partial_fit([features], [correct])
         else:
             logging.warn("The key pressed was not 'Y' or 'N', cannot add images to the dataset without knowing whether the prediction was correct!")
-    
-    logging.info("Saving dataset to file")
-    train = np.insert(x_train, 0, y_train, axis=1)
-    np.savetxt('dataset_temp.csv', train, delimiter=',', fmt='%s')
-    os.remove('dataset.csv')
-    os.rename('dataset_temp.csv', 'dataset.csv')
-
-    logging.info("Done!")
 
 
 if __name__ == "__main__":
