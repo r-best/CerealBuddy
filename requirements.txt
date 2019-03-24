@@ -1,0 +1,5 @@
+numpy==1.16.2
+opencv-python==3.4.4.19
+picamera==1.13
+RPi.GPIO==0.6.5
+scikit-learn==0.20.3
