@@ -13,12 +13,17 @@ from processing import *
 
 
 RESOLUTION = (640, 480)
-PUMP_FORWARD = 18
+SERVO = 18
+PUMP_FORWARD = 27
 PUMP_REVERSE = 17
 
+pwm = None
+
+
 def sig_handler(sig, frame):
-    global running, x_train, y_train
+    global pwm
     logging.info("Shutting down...")
+    pwm.stop()
     GPIO.cleanup()
     exit()
 
@@ -30,10 +35,17 @@ def pour(seconds):
     time.sleep(seconds)
     GPIO.output(PUMP_FORWARD, GPIO.LOW)
     GPIO.output(PUMP_REVERSE, GPIO.LOW)
-    logging.info("Done pouring")
 
+def target(x):
+    global pwm
+    logging.info("Targeting")
+    pwm.start(2.5)
+    target = 9 - ((x / RESOLUTION[0]) * 4 + 5) + 5
+    print(target)
+    pwm.ChangeDutyCycle(target)
 
 def main():
+    global pwm
     logging.basicConfig(format="%(levelname)s: %(message)s")
     logging.getLogger().setLevel(logging.INFO)
 
@@ -43,8 +55,12 @@ def main():
     camera.framerate = 24
     time.sleep(1)
 
-    logging.info("Initializing pump...")
+    logging.info("Initializing motor...")
     GPIO.setmode(GPIO.BCM)
+    GPIO.setup(SERVO, GPIO.OUT)
+    pwm = GPIO.PWM(SERVO, 50)
+
+    logging.info("Initializing pump...")
     GPIO.setup(PUMP_FORWARD, GPIO.OUT)
     GPIO.setup(PUMP_REVERSE, GPIO.OUT)
 
@@ -78,6 +94,7 @@ def main():
         
         if cerealCount >= 10:
             cerealCount = 0
+            target(np.mean((bellipse[0][0], gellipse[0][0], rellipse[0][0])))
             pour(5)
 
 
