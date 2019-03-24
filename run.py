@@ -30,8 +30,8 @@ def sig_handler(sig, frame):
 
 def pour(seconds):
     logging.info("Pouring")
-    GPIO.output(PUMP_FORWARD, GPIO.HIGH)
-    GPIO.output(PUMP_REVERSE, GPIO.LOW)
+    GPIO.output(PUMP_FORWARD, GPIO.LOW)
+    GPIO.output(PUMP_REVERSE, GPIO.HIGH)
     time.sleep(seconds)
     GPIO.output(PUMP_FORWARD, GPIO.LOW)
     GPIO.output(PUMP_REVERSE, GPIO.LOW)
