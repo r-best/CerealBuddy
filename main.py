@@ -1,3 +1,4 @@
+import os
 import cv2
 import time
 import signal
@@ -11,6 +12,8 @@ from processing import *
 
 RESOLUTION = (640, 480)
 running = True
+x_train = []
+y_train = []
 
 
 def sig_handler(sig, frame):
@@ -29,6 +32,11 @@ def main():
     camera.framerate = 24
     time.sleep(1)
 
+    logging.info("Loading training data...")
+    train = np.genfromtxt('dataset.csv', delimiter=',')
+    x_train = train[:,1:]
+    y_train = np.uint8(train[:,0])
+
     signal.signal(signal.SIGINT, sig_handler)
 
     logging.info("Starting inference loop")
@@ -44,6 +52,14 @@ def main():
         cv2.imshow("", image)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
+    
+    logging.info("Saving dataset to file")
+    train = np.insert(x_train, 0, y_train, axis=1)
+    np.savetxt('dataset_temp.csv', train, delimiter=',', fmt='%s')
+    os.remove('dataset.csv')
+    os.rename('dataset_temp.csv', 'dataset.csv')
+
+    logging.info("Done!")
 
 
 if __name__ == "__main__":

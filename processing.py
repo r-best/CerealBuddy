@@ -21,11 +21,11 @@ def extractFeatures(b, g, r):
     # The standard deviation of the circles' areas, measures how similar in size they are
     size_similarity = np.std([b_area, g_area, r_area])
 
-    print("Blue Area: {}".format(b_area))
-    print("Green Area: {}".format(g_area))
-    print("Red Area: {}".format(r_area))
-    print("Distance Similarity: {}".format(dist_similarity))
-    print("Size Similarity: {}".format(size_similarity))
+    logging.debug("Blue Area: {}".format(b_area))
+    logging.debug("Green Area: {}".format(g_area))
+    logging.debug("Red Area: {}".format(r_area))
+    logging.debug("Distance Similarity: {}".format(dist_similarity))
+    logging.debug("Size Similarity: {}".format(size_similarity))
 
     return np.array([b_area, g_area, r_area, dist_similarity, size_similarity])
 
