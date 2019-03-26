@@ -85,17 +85,23 @@ def main():
         bellipse, gellipse, rellipse = getEllipse(image)
         features = extractFeatures(bellipse, gellipse, rellipse)
 
-        # Predicted class is the index with the higher probability
-        pred = np.argmax(clf.predict_proba([features])[0])
+        if features[0] < 5000 or features[1] < 5000 or features[2] < 5000:
+            pred = 0
+        else:
+            # Predicted class is the index with the higher probability
+            pred = np.argmax(clf.predict_proba([features])[0])
 
         if pred == 1:
             cerealCount = cerealCount + 1
             logging.info("Cereal detected! Count: {}".format(cerealCount))
+        else:
+            if cerealCount > 0: logging.info("Cereal lost, resetting counter")
+            cerealCount = 0
         
         if cerealCount >= 10:
             cerealCount = 0
             target(np.mean((bellipse[0][0], gellipse[0][0], rellipse[0][0])))
-            pour(5)
+            pour(20)
 
 
 if __name__ == "__main__":
