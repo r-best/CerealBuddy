@@ -8,10 +8,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.linear_model import SGDClassifier
 
-from processing import *
+from cerealbuddy import *
 
 
-RESOLUTION = (640, 480)
 x_train = []
 y_train = []
 

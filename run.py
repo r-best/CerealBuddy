@@ -9,10 +9,9 @@ import RPi.GPIO as GPIO
 import matplotlib.pyplot as plt
 from sklearn.linear_model import SGDClassifier
 
-from processing import *
+from cerealbuddy import *
 
 
-RESOLUTION = (640, 480)
 SERVO = 18
 PUMP_FORWARD = 27
 PUMP_REVERSE = 17
