@@ -3,13 +3,11 @@ import cv2
 import time
 import signal
 import logging
-import picamera
 import numpy as np
 import RPi.GPIO as GPIO
 import matplotlib.pyplot as plt
-from sklearn.linear_model import SGDClassifier
 
-from cerealbuddy import *
+import cerealbuddy as cereal
 
 
 SERVO = 18
@@ -20,14 +18,17 @@ pwm = None
 
 
 def sig_handler(sig, frame):
+    """
+    """
     global pwm
     logging.info("Shutting down...")
     pwm.stop()
     GPIO.cleanup()
     exit()
 
-
 def pour(seconds):
+    """
+    """
     logging.info("Pouring")
     GPIO.output(PUMP_FORWARD, GPIO.LOW)
     GPIO.output(PUMP_REVERSE, GPIO.HIGH)
@@ -36,6 +37,8 @@ def pour(seconds):
     GPIO.output(PUMP_REVERSE, GPIO.LOW)
 
 def target(x):
+    """
+    """
     global pwm
     logging.info("Targeting")
     pwm.start(2.5)
@@ -49,10 +52,10 @@ def main():
     logging.getLogger().setLevel(logging.INFO)
 
     logging.info("Initializing camera...")
-    camera = picamera.PiCamera()
-    camera.resolution = RESOLUTION
-    camera.framerate = 24
-    time.sleep(1)
+    camera = cereal.initCamera()
+
+    logging.info("Loading model...")
+    _, _, clf = cereal.loadModel()
 
     logging.info("Initializing motor...")
     GPIO.setmode(GPIO.BCM)
@@ -62,13 +65,6 @@ def main():
     logging.info("Initializing pump...")
     GPIO.setup(PUMP_FORWARD, GPIO.OUT)
     GPIO.setup(PUMP_REVERSE, GPIO.OUT)
-
-    logging.info("Loading model...")
-    train = np.genfromtxt('dataset.csv', delimiter=',')
-    x_train = train[:,1:]
-    y_train = np.uint8(train[:,0])
-    clf = SGDClassifier(loss="log")
-    clf.partial_fit(x_train, y_train, classes=[0,1])
 
     signal.signal(signal.SIGINT, sig_handler)
 

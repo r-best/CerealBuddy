@@ -3,12 +3,10 @@ import cv2
 import time
 import signal
 import logging
-import picamera
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn.linear_model import SGDClassifier
 
-from cerealbuddy import *
+import cerealbuddy as cereal
 
 
 x_train = []
@@ -16,6 +14,8 @@ y_train = []
 
 
 def sig_handler(sig, frame):
+    """
+    """
     global running, x_train, y_train
     logging.info("Shutting down...")
     cv2.destroyAllWindows()
@@ -28,24 +28,16 @@ def sig_handler(sig, frame):
     logging.info("Done!")
     exit()
 
-
 def main():
     global x_train, y_train
     logging.basicConfig(format="%(levelname)s: %(message)s")
     logging.getLogger().setLevel(logging.DEBUG)
 
     logging.info("Initializing camera...")
-    camera = picamera.PiCamera()
-    camera.resolution = RESOLUTION
-    camera.framerate = 24
-    time.sleep(1)
+    camera = cereal.initCamera()
 
     logging.info("Loading model...")
-    train = np.genfromtxt('dataset.csv', delimiter=',')
-    x_train = train[:,1:]
-    y_train = np.uint8(train[:,0])
-    clf = SGDClassifier(loss="log")
-    clf.partial_fit(x_train, y_train, classes=[0,1])
+    x_train, y_train, clf = cereal.loadModel()
 
     signal.signal(signal.SIGINT, sig_handler)
 
